@@ -1,18 +1,25 @@
 const express = require("express");
-const {
-    getNotes,
-    getNoteById,
-    createNote,
-    updateNote,
-    deleteNote
-} = require("../controllers/noteController");
-
+const { body } = require("express-validator");
+const noteController = require("../controllers/noteController");
 const authMiddleware = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.use(authMiddleware); // 모든 노트 라우트는 인증 필요
+// 모든 노트 가져오기 (로그인 필요)
+router.get("/", authMiddleware, noteController.getNotes);
 
-router.route("/").get(getNotes).post(createNote);
-router.route("/:id").get(getNoteById).put(updateNote).delete(deleteNote);
+// 노트 생성
+router.post(
+    "/",
+    authMiddleware,
+    [body("title").notEmpty(), body("content").notEmpty()],
+    noteController.createNote
+);
+
+// 노트 수정
+router.put("/:id", authMiddleware, noteController.updateNote);
+
+// 노트 삭제
+router.delete("/:id", authMiddleware, noteController.deleteNote);
 
 module.exports = router;

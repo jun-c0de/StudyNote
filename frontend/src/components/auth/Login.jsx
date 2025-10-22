@@ -1,10 +1,11 @@
 import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import api from "../../api/axios";
+import { login as apiLogin } from "../../api/axios";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const LoginPage = () => {
     const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -12,10 +13,11 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await api.post("/auth/login", { email, password });
-            login(res.data.user, res.data.token);
+            const res = await apiLogin({ email, password });
+            login(res.user, res.token);
+            navigate("/notes"); // 로그인 성공 후 NotePage로 이동
         } catch (err) {
-            setError(err.response?.data?.message || "로그인 오류");
+            setError(err.response?.data?.message || "로그인 실패");
         }
     };
 
@@ -36,17 +38,10 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 <button type="submit">로그인</button>
-                {error && <p style={{ color: "red" }}>{error}</p>}
             </form>
-
-            <p>
-                계정이 없으신가요?{" "}
-                <Link to="/register">
-                    회원가입
-                </Link>
-            </p>
+            {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
     );
 };
 
-export default Login;
+export default LoginPage;

@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
-import api from "../../api/axios";
 import { AuthContext } from "../../context/AuthContext";
+import { register } from "../../api/axios";
+import { Link } from "react-router-dom"; // Link import
 
 const Register = () => {
     const { login } = useContext(AuthContext);
@@ -11,16 +12,16 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submit data:", { email, password, displayName }); // <-- 여기 확인
+        console.log("Submit data:", { email, password, displayName });
+
         try {
-            const res = await api.post("/auth/register", { email, password, displayName });
-            login(res.data.user, res.data.token);
+            const res = await register({ email, password, displayName });
+            login(res.user, res.token);
         } catch (err) {
             console.error(err.response);
             setError(err.response?.data?.message || "회원가입 오류");
         }
     };
-
 
     return (
         <div>
@@ -47,6 +48,14 @@ const Register = () => {
                 <button type="submit">회원가입</button>
                 {error && <p style={{ color: "red" }}>{error}</p>}
             </form>
+
+            {/* 로그인 링크 추가 */}
+            <p style={{ marginTop: "1rem" }}>
+                이미 계정이 있으신가요?{" "}
+                <Link to="/login" style={{ color: "blue", textDecoration: "underline" }}>
+                    로그인
+                </Link>
+            </p>
         </div>
     );
 };

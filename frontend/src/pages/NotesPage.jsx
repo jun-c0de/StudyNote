@@ -1,17 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { fetchNotes, createNote, updateNote, deleteNote } from "../api/axios";
 import NoteForm from "../components/notes/NoteForm";
 import NoteList from "../components/notes/NoteList";
 
-const NotesPage = () => {
-    const [refresh, setRefresh] = useState(false);
+const NotePage = () => {
+    const { user } = useContext(AuthContext);
+    const [notes, setNotes] = useState([]);
+
+    useEffect(() => {
+        loadNotes();
+    }, []);
+
+    const loadNotes = async () => {
+        const data = await fetchNotes(); // 현재 유저 + 공유된 노트 반환
+        setNotes(data);
+    };
+
+    const handleCreate = async (note) => {
+        const newNote = await createNote(note);
+        setNotes([...notes, newNote]);
+    };
+
+    const handleUpdate = async (id, note) => {
+        const updated = await updateNote(id, note);
+        setNotes(notes.map(n => n._id === id ? updated : n));
+    };
+
+    const handleDelete = async (id) => {
+        await deleteNote(id);
+        setNotes(notes.filter(n => n._id !== id));
+    };
 
     return (
         <div>
-            <h1>내 노트</h1>
-            <NoteForm onSaved={() => setRefresh(!refresh)} />
-            <NoteList refresh={refresh} />
+            <h2>{user.displayName}의 노트</h2>
+            <NoteForm onSubmit={handleCreate} />
+            <NoteList notes={notes} onUpdate={handleUpdate} onDelete={handleDelete} />
         </div>
     );
 };
 
-export default NotesPage;
+export default NotePage;

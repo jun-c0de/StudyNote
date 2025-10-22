@@ -1,24 +1,27 @@
-import api from "../../api/axios";
+import { useState } from "react";
+import NoteForm from "./NoteForm";
 
-const NoteItem = ({ note, onDeleted }) => {
-    const handleDelete = async () => {
-        if (!window.confirm("정말 삭제하시겠습니까?")) return;
-        try {
-            await api.delete(`/notes/${note._id}`);
-            console.log("[NoteItem] Deleted", note._id);
-            onDeleted(note._id);
-        } catch (err) {
-            console.error(err.response);
-            alert("삭제 실패");
-        }
+const NoteItem = ({ note, onUpdate, onDelete }) => {
+    const [editing, setEditing] = useState(false);
+
+    const handleUpdate = (updatedNote) => {
+        onUpdate(note._id, updatedNote);
+        setEditing(false);
     };
 
     return (
-        <div style={{ border: "1px solid #ccc", padding: 8, marginBottom: 8 }}>
-            <h4>{note.title}</h4>
-            <p>{note.content}</p>
-            <button onClick={handleDelete}>삭제</button>
-        </div>
+        <li>
+            {editing ? (
+                <NoteForm onSubmit={handleUpdate} initialData={note} />
+            ) : (
+                <div>
+                    <h3>{note.title}</h3>
+                    <p>{note.content}</p>
+                    <button onClick={() => setEditing(true)}>수정</button>
+                    <button onClick={() => onDelete(note._id)}>삭제</button>
+                </div>
+            )}
+        </li>
     );
 };
 

@@ -1,28 +1,44 @@
-import { Routes, Route } from "react-router-dom";  // Router 제거
-import { AuthProvider } from "./context/AuthContext";
+import { useContext } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
+import Landing from "./pages/Landing";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import NotesPage from "./pages/NotesPage";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import NotePage from "./pages/NotesPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 function App() {
+  const { user, isAdmin } = useContext(AuthContext);
+
+  const PrivateRoute = ({ children, adminOnly }) => {
+    if (!user) return <Navigate to="/login" />;
+    if (adminOnly && !isAdmin) return <Navigate to="/" />;
+    return children;
+  };
+
   return (
-    <AuthProvider>
-      {/* Router 제거 */}
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/notes"
-          element={
-            <ProtectedRoute>
-              <NotesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<LoginPage />} />
-      </Routes>
-    </AuthProvider>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/notes"
+        element={
+          <PrivateRoute>
+            <NotePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <PrivateRoute adminOnly>
+            <AdminDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
