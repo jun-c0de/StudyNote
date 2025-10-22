@@ -1,20 +1,24 @@
 const express = require("express");
-const { check } = require("express-validator");
-const { register, login, getProfile } = require("../controllers/authController");
+const { body } = require("express-validator");
+const router = express.Router();
+const authController = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-const router = express.Router();
 
+// 회원가입
 router.post(
     "/register",
     [
-        check("email", "유효한 이메일을 입력하세요").isEmail(),
-        check("password", "비밀번호는 최소 6자 이상").isLength({ min: 6 })
+        body("email").isEmail().withMessage("유효한 이메일을 입력하세요"),
+        body("password").isLength({ min: 6 }).withMessage("비밀번호는 최소 6자"),
     ],
-    register
+    authController.register
 );
 
-router.post("/login", login);
-router.get("/profile", authMiddleware, getProfile);
+// 로그인
+router.post("/login", authController.login);
+
+// 프로필 조회
+router.get("/profile", authMiddleware, authController.getProfile);
 
 module.exports = router;
