@@ -1,20 +1,21 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-// import "./style/Landing.scss"
+import React from 'react';
+import { Link } from 'react-router-dom';
+import "./style/Landing.scss";
+
 const Landing = () => {
     return (
         <section className="landing">
             <div className="container">
                 <div className="landing-hero">
-                    <h1>포토메모</h1>
-                    <p className="landing-sub">사진 한 장, 한 줄 메모. 태그 · 검색 · 공유까지.</p>
+                    <h1>StudyNote</h1>
+                    <p className="landing-sub">사진 · 메모 · 태그 · 검색 · 공유까지.</p>
                     <Link to="/register" className="btn btn-primary">시작하기</Link>
                 </div>
 
                 <ul className="landing-features">
                     <li>
                         <h3>빠른 기록</h3>
-                        <p>이미지 업로드 후 한 줄 메모로 즉시 저장.</p>
+                        <p>이미지 업로드 후 메모로 즉시 저장.</p>
                     </li>
                     <li>
                         <h3>태그 & 검색</h3>
@@ -27,7 +28,7 @@ const Landing = () => {
                 </ul>
             </div>
         </section>
-    )
-}
+    );
+};
 
-export default Landing
+export default Landing;

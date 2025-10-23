@@ -1,12 +1,21 @@
-// src/api/axios.js
 import axios from "axios";
 
-// 환경변수에서 API 주소 가져오기
 const BASE_URL = import.meta.env.VITE_API_URL;
+
+// ===== 로컬스토리지 유틸 =====
+export function saveAuthToStorage({ user, token }) {
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    if (token) localStorage.setItem("token", token);
+}
+
+export function clearAuthStorage() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+}
 
 // Axios 인스턴스
 const api = axios.create({
-    baseURL: BASE_URL, // 예: http://localhost:3000
+    baseURL: BASE_URL,
     withCredentials: true,
     headers: { "Content-Type": "application/json" }
 });
@@ -33,57 +42,29 @@ api.interceptors.response.use(
     }
 );
 
-// 에러 메시지 유틸
-export function getErrorMessage(error, fallback = "요청 실패") {
-    return error.response?.data?.message || error.message || fallback;
-}
-
-// ====== Auth 관련 API ======
-
-// 회원가입
+// ===== Auth API =====
 export async function register({ email, password, displayName }) {
-    const { data } = await api.post("/api/auth/register", {
-        email,
-        password,
-        displayName
-    });
+    const { data } = await api.post("/api/auth/register", { email, password, displayName });
     return data;
 }
 
-// 로그인
 export async function login({ email, password }) {
-    const { data } = await api.post("/api/auth/login", {
-        email,
-        password
-    });
+    const { data } = await api.post("/api/auth/login", { email, password });
     return data;
 }
 
-// 내 정보 조회
 export async function fetchMe() {
     const { data } = await api.get("/api/auth/me");
     return data;
 }
 
-// 로그아웃
 export async function logout() {
     return await api.post("/api/auth/logout");
 }
 
-// ====== 로컬스토리지 유틸 ======
-export function saveAuthToStorage({ user, token }) {
-    if (user) localStorage.setItem("user", JSON.stringify(user));
-    if (token) localStorage.setItem("token", token);
-}
-
-export function clearAuthStorage() {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-}
-
-// ====== 노트 관련 API (예시) ======
+// ===== Notes API =====
 export async function fetchNotes() {
-    const { data } = await api.get("/api/notes");
+    const { data } = await api.get("/api/notes"); // 유저 + 공유 노트 반환
     return data;
 }
 

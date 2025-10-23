@@ -13,11 +13,11 @@ const NotePage = () => {
     }, []);
 
     const loadNotes = async () => {
-        const data = await fetchNotes(); // 현재 유저 + 공유된 노트 반환
+        const data = await fetchNotes(); // 본인 + 공유 노트 포함
         setNotes(data);
     };
 
-    const handleCreate = async (note) => {
+    const handleCreate = async note => {
         const newNote = await createNote(note);
         setNotes([...notes, newNote]);
     };
@@ -27,7 +27,7 @@ const NotePage = () => {
         setNotes(notes.map(n => n._id === id ? updated : n));
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async id => {
         await deleteNote(id);
         setNotes(notes.filter(n => n._id !== id));
     };

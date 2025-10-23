@@ -13,21 +13,18 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
 
-    // 로그인
     const login = useCallback((userData, token) => {
         setUser(userData);
         setToken(token);
         saveAuthToStorage({ user: userData, token });
     }, []);
 
-    // 로그아웃
     const logout = useCallback(() => {
         setUser(null);
         setToken(null);
         clearAuthStorage();
     }, []);
 
-    // 페이지 새로고침 시 인증 유지
     useEffect(() => {
         const initAuth = async () => {
             const storedToken = localStorage.getItem("token");
@@ -37,15 +34,13 @@ export const AuthProvider = ({ children }) => {
                 const { user } = await fetchMe();
                 setUser(user);
                 setToken(storedToken);
-            } catch (err) {
+            } catch {
                 logout();
             }
         };
-
         initAuth();
     }, [logout]);
 
-    // 관리자 여부
     const isAdmin = user?.role === "admin";
 
     return (
