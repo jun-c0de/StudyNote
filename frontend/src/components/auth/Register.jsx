@@ -1,62 +1,56 @@
-import { useState, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { register } from "../../api/axios";
-import { Link } from "react-router-dom"; // Link import
+import React, { useState } from 'react';
+import { register as apiRegister } from '../../api/axios'; // ⬅️ API 함수 임포트
 
-const Register = () => {
-    const { login } = useContext(AuthContext);
-    const [email, setEmail] = useState("");
-    const [displayName, setDisplayName] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+const Register = ({ onAuthed, onClose, setParentLoading }) => {
+    const [form, setForm] = useState({ email: '', password: '', displayName: '' });
+    const [err, setErr] = useState('');
 
-    const handleSubmit = async (e) => {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const submit = async (e) => {
         e.preventDefault();
-        console.log("Submit data:", { email, password, displayName });
+        setParentLoading(true);
+        setErr('');
 
         try {
-            const res = await register({ email, password, displayName });
-            login(res.user, res.token);
-        } catch (err) {
-            console.error(err.response);
-            setError(err.response?.data?.message || "회원가입 오류");
+            const payload = {
+                email: form.email.trim(),
+                password: form.password.trim(),
+                displayName: form.displayName.trim()
+            };
+
+            // 백엔드 API 호출
+            const data = await apiRegister(payload); // data: {user, token}
+
+            setErr('');
+            onAuthed?.(data); // Context에 인증 정보 전달
+            onClose?.(); // 모달 닫기
+        } catch (error) {
+            const msg = error?.response?.data?.message || '회원가입 실패';
+            setErr(msg);
+            console.log('Register fail', error?.response?.status, error?.response?.data);
+        } finally {
+            setParentLoading(false);
         }
     };
 
-    return (
-        <div>
-            <h2>회원가입</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="닉네임"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                />
-                <input
-                    type="email"
-                    placeholder="이메일"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="비밀번호"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">회원가입</button>
-                {error && <p style={{ color: "red" }}>{error}</p>}
-            </form>
+    const isLoading = false;
 
-            {/* 로그인 링크 추가 */}
-            <p style={{ marginTop: "1rem" }}>
-                이미 계정이 있으신가요?{" "}
-                <Link to="/login" style={{ color: "blue", textDecoration: "underline" }}>
-                    로그인
-                </Link>
-            </p>
-        </div>
+    return (
+        <form className='am-form' onSubmit={submit}>
+            <input type="text" name='displayName' value={form.displayName} onChange={handleChange} placeholder='닉네임' required />
+            <input type="email" name='email' value={form.email} onChange={handleChange} required placeholder='이메일' />
+            <input type="password" name="password" value={form.password} onChange={handleChange} required placeholder='비밀번호' />
+
+            {err && <div className="am-msg error" role='alert'>{err}</div>}
+
+            <button type='submit' disabled={isLoading} className="btn primary">
+                {isLoading ? '처리중...' : '가입하기'}
+            </button>
+        </form>
     );
 };
 

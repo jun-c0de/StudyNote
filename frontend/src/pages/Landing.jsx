@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Link 임포트
-import "./style/Landing.scss";
+import { Link } from 'react-router-dom';
+import "./style/Landing.scss"; // ⬅️ 스타일 경로는 그대로 유지 (pages/style/Landing.scss로 가정)
 
 // 라우팅 방식으로 변경했기 때문에 App에서 받은 모든 props는 제거합니다.
 const Landing = () => {
@@ -11,7 +11,7 @@ const Landing = () => {
                 <div className="landing-hero">
                     <h1>포토메모</h1>
                     <p className="landing-sub">사진 한 장, 한 줄 메모. 태그 · 검색 · 공유까지.</p>
-                    {/* ⬅️ "시작하기" 버튼 클릭 시 AuthPanel 페이지로 이동 */}
+                    {/* "시작하기" 버튼 클릭 시 AuthPanel 페이지로 이동 */}
                     <Link to="/admin/login" className="btn primary">시작하기</Link>
                 </div>
 

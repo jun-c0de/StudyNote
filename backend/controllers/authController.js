@@ -63,5 +63,26 @@ exports.login = async (req, res) => {
 // PROFILE
 exports.getProfile = async (req, res) => {
     // req.user is populated by authMiddleware
-    return res.json(req.user.toSafeJSON());
+    // 프론트엔드에서 요구하는 상세 정보 (me)를 제공합니다.
+    return res.json({ user: req.user.toSafeJSON() });
+};
+
+
+/**
+ * POST /api/auth/logout
+ * @description 서버 세션 또는 토큰 쿠키를 제거하여 로그아웃 처리합니다.
+ */
+exports.logout = (req, res) => {
+    // 토큰이 HTTP-only 쿠키에 저장되어 있다고 가정하고 쿠키를 삭제합니다.
+    // JWT를 localStorage에 저장하는 방식이라면 이 로직은 필요 없습니다.
+    // 하지만 프론트엔드가 POST 요청을 보내므로, 서버 측에서 정리할 것이 없다면 200만 반환합니다.
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+
+    // 클라이언트 측에게 로그아웃이 성공했음을 알립니다.
+    // 프론트엔드 (AuthContext)에서 이 응답을 받아 로컬 스토리지를 지우게 됩니다.
+    res.status(200).json({ message: '로그아웃 성공' });
 };
