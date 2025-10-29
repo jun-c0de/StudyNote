@@ -1,33 +1,30 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import React from 'react'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
-// ProtectRoute를 ProtectedRoute로 리네임하고 Context를 사용하도록 수정
-const ProtectedRoute = ({ requiredRole = null, redirect = '/admin/login', children }) => {
-    const { user, isAuthReady, isAuthed } = useAuth();
+const ProtectRoute = ({
+    isAuthed,
+    user,
+    requiredRole,
+    redirect = '/admin/login' // 비인증 시 리다이렉트 기본 경로
+}) => {
 
-    // Context 초기화 대기
-    if (!isAuthReady) {
-        return <div style={{ padding: '20px', textAlign: 'center' }}>인증 상태 확인 중...</div>;
-    }
+    const location = useLocation()
 
-    // 1. 인증되지 않은 경우, 지정된 리다이렉트 경로로 이동 (기본값: /admin/login)
+    // 1. 인증(로그인) 여부 확인
     if (!isAuthed) {
-        return <Navigate to={redirect} replace />;
+        // 로그인 안 되었으면 지정된 로그인 페이지로 리다이렉트
+        return <Navigate to={redirect} replace state={{ from: location }} />
     }
 
-    // 2. 인증되었지만, 역할(Role) 요구 사항이 있는 경우 검사
-    if (requiredRole) {
-        const hasRequiredRole = user?.role === requiredRole;
-
-        if (!hasRequiredRole) {
-            // 권한이 없으면 일반 사용자 대시보드로 이동 (또는 권한 없음 페이지로)
-            return <Navigate to="/user/dashboard" replace />;
-        }
+    // 2. 권한(Role) 확인
+    // requiredRole이 지정되어 있는데, 사용자의 역할과 일치하지 않으면
+    if (requiredRole && user?.role !== requiredRole) {
+        // 권한이 일치하지 않으면 메인 페이지로 리다이렉트 (사용자님 로직)
+        return <Navigate to='/' replace />
     }
 
-    // 3. 인증 및 권한 확인 완료
-    return children ? children : <Outlet />;
-};
+    // 3. 통과: 인증 및 권한 확인 완료
+    return <Outlet />
+}
 
-export default ProtectedRoute;
+export default ProtectRoute
