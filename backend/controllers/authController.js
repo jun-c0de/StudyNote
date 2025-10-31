@@ -20,7 +20,8 @@ exports.register = async (req, res) => {
         const token = generateToken(user);
         res.status(201).json({ user: user.toSafeJSON(), token });
     } catch (err) {
-        console.error(err);
+        console.error("[Register Error]", err.message);
+        console.error("Stack:", err.stack);
         res.status(500).json({ message: "회원가입 중 오류가 발생했습니다." });
     }
 };
@@ -55,7 +56,9 @@ exports.login = async (req, res) => {
         const token = generateToken(user);
         return res.json({ user: user.toSafeJSON(), token });
     } catch (err) {
-        console.error(err);
+        // 💡 이 부분이 핵심입니다: 에러 스택을 출력하여 문제의 근원지 파악을 돕습니다.
+        console.error("[Login Error]", err.message);
+        console.error("Stack:", err.stack);
         res.status(500).json({ message: "로그인 중 오류가 발생했습니다." });
     }
 };

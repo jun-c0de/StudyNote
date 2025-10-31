@@ -2,6 +2,7 @@ import api from "./axios";
 
 const PUBLIC_BASE = import.meta.env.VITE_S3_PUBLIC_BASE || "";
 
+// 이 함수들은 기존 코드의 유틸리티이므로 그대로 유지합니다.
 function urlToKey(u) {
     if (!u) return "";
     const s = String(u);
@@ -24,46 +25,89 @@ function toKeyArray(val) {
     return arr.map(urlToKey).filter(Boolean);
 }
 
-// 1. 파일 업로드: 프리사인 URL을 받아 S3에 직접 파일을 전송합니다.
-export const uploadToS3 = async (file, opts = {}) => {
+// ----------------------------------------------------------------------
+// S3 업로드 로직 (분리된 함수)
+// ----------------------------------------------------------------------
+
+/**
+ * 1. 백엔드에 파일 정보(이름, 타입)를 보내 S3 Presigned PUT URL을 요청합니다.
+ * @returns {Promise<{url: string, key: string}>} Presigned URL과 S3 키
+ */
+export const getPresignedUrl = async (fileName, fileType) => {
     const {
         data: { url, key },
     } = await api.post("/api/upload/presign", {
-        filename: file.name,
-        contentType: file.type,
-        // replaceKey,
+        filename: fileName,
+        contentType: fileType,
     });
 
+    return { url, key };
+};
+
+/**
+ * 2. Presigned URL을 사용하여 S3에 파일을 직접 PUT 요청으로 업로드합니다.
+ * @param {string} url - Presigned PUT URL
+ * @param {File} file - 업로드할 파일 객체
+ * @param {string} fileType - 파일의 MIME 타입
+ * @returns {Promise<void>}
+ */
+export const uploadFileToS3 = async (url, file, fileType) => {
     const putRes = await fetch(url, {
         method: "PUT",
-        headers: { "Content-Type": file.type },
+        headers: { "Content-Type": fileType },
         body: file,
     });
 
-    if (!putRes.ok) throw new Error("S3 업로드 실패");
+    if (!putRes.ok) {
+        console.error("S3 Upload Failed Response:", await putRes.text());
+        throw new Error("S3 업로드 실패");
+    }
+};
+
+// ----------------------------------------------------------------------
+// 기존 UserDashboard.jsx와의 호환성을 위한 함수 재정의 (필수)
+// ----------------------------------------------------------------------
+
+/**
+ * [호환성 복원] 파일 업로드: Presign 요청과 S3 업로드를 모두 처리하고 최종 키를 반환합니다.
+ * UserDashboard.jsx와 같은 기존 컴포넌트에서 이 함수를 사용합니다.
+ *
+ * @param {File} file - 업로드할 파일 객체
+ * @returns {Promise<string>} 최종 S3 키
+ */
+export const uploadToS3 = async (file, opts = {}) => {
+    // 1. Presigned URL 요청 (기존 로직)
+    const { url, key } = await getPresignedUrl(file.name, file.type);
+
+    // 2. S3에 파일 업로드 (기존 로직)
+    await uploadFileToS3(url, file, file.type);
 
     return key;
 };
 
-// 2. 게시물 생성: 제목, 내용, 파일 키를 서버에 전달하여 게시물을 생성합니다.
+// ----------------------------------------------------------------------
+// 게시물 관련 함수들 (기존 이름 유지)
+// ----------------------------------------------------------------------
+
+// 3. 게시물 생성
 export const createPost = async ({ title, content, fileKeys }) => {
     const { data } = await api.post("/api/posts", {
         title,
         content,
-        fileUrl: fileKeys,
+        fileUrl: Array.isArray(fileKeys) ? fileKeys[0] : fileKeys,
     });
 
     return data;
 };
 
-// 3. 내 게시물 가져오기: (현재 프로젝트에서는 사용하지 않음)
+// 4. 내 게시물 가져오기
 export const fetchMyPosts = async () => {
     const { data } = await api.get('/api/posts/my')
 
     return Array.isArray(data) ? data : []
 }
 
-// 4. 모든 게시물 가져오기: 커뮤니티 대시보드에서 사용할 함수 (수정 없이 사용 가능)
+// 5. 모든 게시물 가져오기
 export const fetchAllPosts = async () => {
     const { data } = await api.get('/api/posts')
 

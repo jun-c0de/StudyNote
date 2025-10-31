@@ -1,29 +1,41 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+
+// 💡 [수정] DB 연결 코드를 가져옵니다.
 const connectDB = require("./config/db");
-// 💡 [수정]: 'auth' 대신 'authRoutes'를 사용해야 합니다.
+const s3 = require("./src/s3");
+
+// 라우터 임포트
 const authRoutes = require("./routes/authRoutes");
 const postRoutes = require("./routes/postRoutes");
+const uploadRoutes = require("./routes/upload");
 
+// 환경 변수 로드
 dotenv.config();
-// db 연결 코드가 파일 경로상 config 폴더 안에 있다면 아래처럼 수정해야 합니다.
-// const connectDB = require("./config/db");
+
+// 💡 [수정] connectDB() 함수를 호출하여 MongoDB에 연결을 시도합니다.
 connectDB();
 
 const app = express();
+
+// CORS 설정
 app.use(cors({
-    origin: process.env.FRONT_ORIGIN, // .env 파일에 맞게 수정
+    origin: process.env.FRONT_ORIGIN,
     credentials: true
 }));
+
+// JSON 및 URL-encoded 본문 파싱
 app.use(express.json());
 
-// routes
+// --- 라우터 연결 ---
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/upload", uploadRoutes); // S3 Presigned URL 라우터 연결
 
-// health
+// health check
 app.get("/", (req, res) => res.send("SmartNote API is running"));
 
+// --- 서버 시작 ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
