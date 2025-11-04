@@ -1,80 +1,71 @@
 import React, { useState, useEffect } from "react";
-import { toPublicUrl } from "../../util/toPublicUrl";
 
-const UploadForm = ({ initial, onClose, onUploaded }) => {
-    const [form, setForm] = useState({
-        title: initial?.title ?? "",
-        content: initial?.content ?? "",
-        file: null,
-        preview: initial?.fileUrl ? toPublicUrl(initial.fileUrl[0]) : null,
-    });
-    const [uploading, setUploading] = useState(false);
-    const [message, setMessage] = useState("");
+const UploadForm = ({ initial = {}, onClose, onUploaded }) => {
+    const [title, setTitle] = useState(initial.title || "");
+    const [content, setContent] = useState(initial.content || "");
+    const [file, setFile] = useState(null);
+    const isEdit = !!initial._id;
 
-    // blob cleanup
-    useEffect(() => {
-        return () => {
-            if (form.preview?.startsWith("blob:")) URL.revokeObjectURL(form.preview);
-        };
-    }, [form.preview]);
-
-    const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        if (form.preview?.startsWith("blob:")) URL.revokeObjectURL(form.preview);
-        setForm({ ...form, file, preview: URL.createObjectURL(file) });
-    };
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        if (!form.title.trim()) return setMessage("제목을 입력해주세요.");
-        if (uploading) return;
-
-        try {
-            setUploading(true);
-            await onUploaded({
-                title: form.title.trim(),
-                content: form.content.trim(),
-                file: form.file,
-            });
-            setMessage("업로드 완료!");
-            setForm({ title: "", content: "", file: null, preview: null });
-            onClose();
-        } catch (err) {
-            console.error(err);
-            setMessage(err.message || "업로드 실패");
-        } finally {
-            setUploading(false);
+        if (!title || !content) {
+            alert("제목과 내용을 모두 입력해주세요.");
+            return;
         }
+        onUploaded({ title, content, file, initial });
     };
 
     return (
-        <section className="am-backdrop">
-            <form className="am-panel Upload-form" onSubmit={handleSubmit}>
-                <h2>{initial ? "수정" : "새 업로드"}</h2>
-                <input
-                    type="text"
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    placeholder="제목"
-                />
-                <textarea
-                    value={form.content}
-                    onChange={(e) => setForm({ ...form, content: e.target.value })}
-                    placeholder="내용"
-                    rows={3}
-                />
-                <input type="file" accept="image/*" onChange={handleFileChange} />
-                {form.preview && <img src={form.preview} alt="미리보기" />}
-                <div>{message}</div>
-                <button type="submit" disabled={uploading}>
-                    {uploading ? "업로드 중..." : "업로드"}
-                </button>
-                <button type="button" onClick={onClose}>
-                    취소
-                </button>
-            </form>
-        </section>
+        <div className="upload-form-container">
+            <div className="upload-form-modal p-6 bg-white rounded-xl shadow-2xl">
+                <h3 className="text-xl font-bold mb-4">{isEdit ? "메모 수정" : "새 메모 작성"}</h3>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">제목</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg mt-1"
+                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">내용</label>
+                        <textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-lg mt-1 h-32"
+                            required
+                        ></textarea>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">파일 첨부 (선택)</label>
+                        <input
+                            type="file"
+                            onChange={(e) => setFile(e.target.files[0])}
+                            className="w-full p-2 border border-gray-300 rounded-lg mt-1"
+                        />
+                        {isEdit && <p className="text-xs text-gray-500 mt-1">새 파일을 첨부하면 기존 파일이 대체됩니다.</p>}
+                    </div>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+                        >
+                            취소
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition"
+                        >
+                            {isEdit ? "수정 완료" : "작성"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     );
 };
 

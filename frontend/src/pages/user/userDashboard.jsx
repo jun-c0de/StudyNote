@@ -3,6 +3,7 @@ import UploadForm from "./UploadForm";
 import UserPostList from "./UserPostList";
 import { usePosts } from "../../hooks/usePosts";
 import { uploadToS3 } from "../../api/postApi";
+import "./style/UserDashboard.scss"
 
 const UserDashboard = () => {
     const { items, load, add, update } = usePosts();

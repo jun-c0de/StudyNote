@@ -1,0 +1,86 @@
+// UserDashboard.scss
+
+.dashboard {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.search-wrap {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    .search-input {
+        flex-grow: 1;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+
+        &:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+    }
+}
+
+// 버튼 기본 스타일
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.1s;
+
+    &:active {
+        transform: scale(0.98);
+    }
+}
+
+.btn.primary {
+    background-color: #3498db; // Primary Color
+    color: white;
+
+    &:hover {
+        background-color: #2980b9;
+    }
+}
+
+// 모바일 반응형
+@media (max-width: 640px) {
+    .dashboard {
+        padding: 1rem;
+    }
+
+    .search-wrap {
+        flex-direction: column;
+        padding: 0.75rem;
+
+        .search-input {
+            width: 100%;
+        }
+    }
+
+    .btn {
+        width: 100%;
+    }
+}

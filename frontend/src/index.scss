@@ -64,7 +64,7 @@ ul {
 
 
 :root {
-  /* ===== Base Tone ===== */
+  /* ===== Base Tone (고객님 변수 사용) ===== */
   --bg: #ffffff;
   --surface: #f9fafb;
   --surface-alt: #f3f4f6;
@@ -109,7 +109,7 @@ ul {
 
 
 /* =========================
-   Typography
+   Typography
 ========================= */
 h1 {
   font-size: clamp(2.8rem, 4.5vw, 4rem);
@@ -132,7 +132,7 @@ p {
 }
 
 /* =========================
-   Layout Utils
+   Layout Utils
 ========================= */
 .container {
   max-width: 96rem;
@@ -162,7 +162,7 @@ section {
 }
 
 /* =========================
-   Forms (공통)
+   Forms (공통)
 ========================= */
 input,
 select,
@@ -180,7 +180,7 @@ textarea {
 }
 
 /* =========================
-   Buttons
+   Buttons
 ========================= */
 button {
   display: inline-flex;
@@ -221,7 +221,7 @@ button {
 }
 
 /* =========================
-   Code Block
+   Code Block
 ========================= */
 pre {
   background: var(--surface);
