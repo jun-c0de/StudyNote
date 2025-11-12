@@ -48,19 +48,19 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-// compare plain password to hash
+// 비밀번호 비교
 userSchema.methods.comparePassword = function (plain) {
     return bcrypt.compare(plain, this.passwordHash);
 };
 
-// set password (hash)
+// 비밀번호 설정 (해시화)
 userSchema.methods.setPassword = async function (plain) {
     const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
     const salt = await bcrypt.genSalt(rounds);
     this.passwordHash = await bcrypt.hash(plain, salt);
 };
 
-// safe JSON (hide passwordHash and internal fields)
+// 안전한 JSON 변환 (비밀번호 제외)
 userSchema.methods.toSafeJSON = function () {
     const obj = this.toObject({ versionKey: false });
     delete obj.passwordHash;

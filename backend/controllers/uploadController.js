@@ -1,44 +1,66 @@
-const { presignPut } = require("../src/s3"); // S3 유틸리티 임포트
+const { presignPut } = require("../utils/s3");
 const path = require("path");
 const { v4: uuid } = require("uuid");
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 /**
  * POST /api/upload/presign-put
  * @description 파일 업로드를 위한 Presigned PUT URL을 생성합니다.
- * @param {string} filename - 파일 이름 (확장자 포함)
- * @param {string} mimeType - 파일의 MIME 타입
  */
 exports.presignPut = async (req, res) => {
     try {
-        const { filename, mimeType } = req.body;
+        const { filename, mimeType, fileSize } = req.body;
 
         if (!filename || !mimeType) {
             return res.status(400).json({ message: "filename 및 mimeType이 필요합니다." });
         }
 
-        // 1. 파일 이름 유효성 검사 (보안 강화)
+        // 파일 크기 검증
+        if (fileSize && fileSize > MAX_FILE_SIZE) {
+            return res.status(400).json({
+                message: "파일 크기는 5MB를 초과할 수 없습니다."
+            });
+        }
+
+        // MIME 타입 검증
+        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        if (!allowedMimeTypes.includes(mimeType)) {
+            return res.status(400).json({
+                message: "지원되지 않는 파일 형식입니다. (jpg, png, gif만 허용)"
+            });
+        }
+
+        // 파일 이름 유효성 검사
         const ext = path.extname(filename).toLowerCase();
         const basename = path.basename(filename, ext);
 
         if (!['.jpg', '.jpeg', '.png', '.gif'].includes(ext)) {
-            return res.status(400).json({ message: "지원되지 않는 파일 형식입니다. (jpg, png, gif만 허용)" });
+            return res.status(400).json({
+                message: "지원되지 않는 파일 확장자입니다."
+            });
         }
 
-        // 2. S3 Key (경로) 생성
-        // 경로: 'uploads/2024/07/{UUID}-{filename}'
+        // S3 Key 생성
         const date = new Date();
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const uniqueId = uuid();
 
-        // 최종 S3 Key: 파일명을 안전하게 인코딩합니다.
         const Key = `uploads/${year}/${month}/${uniqueId}-${encodeURIComponent(basename)}${ext}`;
 
-        // 3. Presigned URL 생성 (업로드 만료 시간 300초 = 5분)
+        // Presigned URL 생성 (5분 유효)
         const presignedUrl = await presignPut(Key, mimeType, 300);
 
-        // 4. 클라이언트에게 URL 및 S3 Key 반환
-        res.json({ presignedUrl, Key });
+        // S3 Base URL 구성
+        const s3BaseUrl = process.env.S3_BASE_URL || `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+        const fileUrl = `${s3BaseUrl}/${Key}`;
+
+        res.json({
+            presignedUrl,
+            Key,
+            fileUrl  // 업로드 후 접근할 수 있는 최종 URL
+        });
 
     } catch (err) {
         console.error("Presign Put Error:", err);

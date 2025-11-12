@@ -8,11 +8,17 @@ const router = express.Router();
 // 모든 노트 가져오기 (로그인 필요)
 router.get("/", authMiddleware, noteController.getNotes);
 
+// 특정 노트 조회
+router.get("/:id", authMiddleware, noteController.getNoteById);
+
 // 노트 생성
 router.post(
     "/",
     authMiddleware,
-    [body("title").notEmpty(), body("content").notEmpty()],
+    [
+        body("title").notEmpty().withMessage("제목은 필수입니다"),
+        body("content").notEmpty().withMessage("내용은 필수입니다")
+    ],
     noteController.createNote
 );
 

@@ -1,31 +1,31 @@
 const express = require("express");
 const { body } = require("express-validator");
-// 💡 [수정] noteController 대신 postController를 임포트합니다.
 const postController = require("../controllers/postController");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// 💡 GET /api/posts: 모든 사용자의 공개 게시물을 가져옵니다. (404 해결)
-// postController.getAllPosts로 변경
+// 전체 공개 게시물 조회 (인증 불필요)
 router.get("/", postController.getAllPosts);
 
-// 💡 GET /api/posts/my: 로그인한 사용자의 게시물만 가져오기 
-// postController.getMyPosts로 변경
+// 내 게시물 조회 (인증 필요)
 router.get("/my", authMiddleware, postController.getMyPosts);
 
-// 💡 POST /api/posts: 새 게시물 생성 (로그인 필요)
-// postController.createPost로 변경
+// 게시물 생성 (인증 필요)
 router.post(
     "/",
     authMiddleware,
-    [body("title").notEmpty(), body("content").notEmpty()],
+    [
+        body("title").notEmpty().withMessage("제목은 필수입니다"),
+        body("content").notEmpty().withMessage("내용은 필수입니다")
+    ],
     postController.createPost
 );
 
-// 💡 게시물 수정 및 삭제
-// postController.updatePost 및 postController.deletePost로 변경
+// 게시물 수정 (인증 필요)
 router.put("/:id", authMiddleware, postController.updatePost);
+
+// 게시물 삭제 (인증 필요)
 router.delete("/:id", authMiddleware, postController.deletePost);
 
 module.exports = router;
