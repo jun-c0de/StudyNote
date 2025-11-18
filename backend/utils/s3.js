@@ -4,7 +4,6 @@ const {
     DeleteObjectCommand,
     GetObjectCommand,
 } = require("@aws-sdk/client-s3");
-
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 // 환경 변수 확인
@@ -16,7 +15,6 @@ const required = [
 ];
 
 const missing = required.filter((k) => !process.env[k]);
-
 if (missing.length) {
     console.error("❌ [S3 ENV Missing]", missing);
 }
@@ -32,9 +30,7 @@ const s3 = new S3Client({
 
 const Bucket = process.env.S3_BUCKET;
 
-/**
- * 업로드를 위한 Presigned URL 생성
- */
+/** Presigned URL for uploading */
 async function presignPut(Key, ContentType, sec = 300) {
     if (!Bucket) throw new Error("S3 bucket is undefined");
     if (!Key) throw new Error("Key is required");
@@ -43,9 +39,7 @@ async function presignPut(Key, ContentType, sec = 300) {
     return getSignedUrl(s3, cmd, { expiresIn: sec });
 }
 
-/**
- * 다운로드를 위한 Presigned URL 생성
- */
+/** Presigned URL for downloading */
 async function presignGet(Key, sec = 300) {
     if (!Bucket) throw new Error("S3 bucket is undefined");
     if (!Key) throw new Error("Key is required");
@@ -54,9 +48,7 @@ async function presignGet(Key, sec = 300) {
     return getSignedUrl(s3, cmd, { expiresIn: sec });
 }
 
-/**
- * S3 객체 삭제
- */
+/** Delete an object */
 async function deleteObject(Key) {
     if (!Bucket) throw new Error("S3 bucket is undefined");
     if (!Key) throw new Error("Key is required");
@@ -68,9 +60,28 @@ async function deleteObject(Key) {
     return { ok: true, message: `Deleted: ${Key}` };
 }
 
-/**
- * S3 객체 업데이트 (서버 측 직접 업로드)
- */
+/** Upload or update object directly from server */
 async function updateObject(Key, Body, ContentType) {
     if (!Bucket) throw new Error("S3 bucket is undefined");
     if (!Key) throw new Error("Key is required");
+
+    const cmd = new PutObjectCommand({
+        Bucket,
+        Key,
+        Body,
+        ContentType,
+    });
+
+    await s3.send(cmd);
+
+    console.log(`✅ [S3] Updated: ${Key}`);
+    return { ok: true, message: `Updated: ${Key}` };
+}
+
+/** Export functions */
+module.exports = {
+    presignPut,
+    presignGet,
+    deleteObject,
+    updateObject,
+};

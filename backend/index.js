@@ -4,12 +4,13 @@ const cors = require("cors");
 
 // 💡 [수정] DB 연결 코드를 가져옵니다.
 const connectDB = require("./config/db");
-const s3 = require("./src/s3");
+const s3 = require("./utils/s3");
 
 // 라우터 임포트
 const authRoutes = require("./routes/authRoutes");
 const postRoutes = require("./routes/postRoutes");
-const uploadRoutes = require("./routes/upload");
+const uploadRoutes = require("./routes/uploadRouters");
+
 
 // 환경 변수 로드
 dotenv.config();
