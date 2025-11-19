@@ -1,32 +1,41 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import "./style/Landing.scss"; // ⬅️ 스타일 경로는 그대로 유지 (pages/style/Landing.scss로 가정)
+// 스타일 파일은 StudyLanding.scss를 사용한다고 가정합니다.
+import '../pages/style/Landing.scss';
 
-const Landing = () => {
-
+/**
+ * 스터디노트 서비스의 랜딩 페이지 컴포넌트
+ * 학습 관리 기능 소개 및 로그인/시작 버튼을 포함합니다.
+ */
+const StudyLanding = () => {
     return (
         <section className="landing">
             <div className="container">
+                {/* 메인 히어로 섹션 */}
                 <div className="landing-hero">
-                    <h1>포토메모</h1>
-                    <p className="landing-sub">사진 한 장, 한 줄 메모. 태그 · 검색 · 공유까지.</p>
+                    <h1>스터디노트 (StudyNote)</h1>
+                    <p className="landing-sub">
+                        효율적인 학습 관리의 시작! 필기 정리, 오답 분석, 시험 대비까지.
+                        당신의 모든 공부 기록을 한 곳에서 완벽하게 관리하세요.
+                    </p>
 
-                    {/* 💡 수정: '/admin/login' 대신 모든 인증 처리 경로인 '/login'으로 변경 */}
-                    <Link to="/login" className="btn primary">시작하기</Link>
+                    {/* 시작하기 버튼 (React Router Link 사용 가정) */}
+                    <Link to="/login" className="btn primary">나만의 학습 시작하기</Link>
                 </div>
 
+                {/* 주요 기능 목록 섹션 */}
                 <ul className="landing-features">
                     <li>
-                        <h3>빠른 기록</h3>
-                        <p>이미지 업로드 후 한 줄 메모로 즉시 저장.</p>
+                        <h3>체계적인 필기 정리</h3>
+                        <p>과목별, 날짜별로 정리하고 중요한 내용을 하이라이트하여 복습 효율을 높입니다.</p>
                     </li>
                     <li>
-                        <h3>태그 & 검색</h3>
-                        <p>태그로 묶고 검색으로 바로 찾기.</p>
+                        <h3>오답 노트 자동 생성</h3>
+                        <p>틀린 문제를 자동으로 분류하고 비슷한 유형을 추천하여 약점을 집중적으로 보완합니다.</p>
                     </li>
                     <li>
-                        <h3>간단 공유</h3>
-                        <p>공유 링크로 가볍게 전달.</p>
+                        <h3>시험 대비 플래너</h3>
+                        <p>시험 일정을 입력하면, 남은 기간 동안의 학습 분량을 자동으로 계산하여 최적의 계획을 세워줍니다.</p>
                     </li>
                 </ul>
             </div>
@@ -34,4 +43,4 @@ const Landing = () => {
     );
 }
 
-export default Landing;
+export default StudyLanding;

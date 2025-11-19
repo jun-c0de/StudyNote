@@ -1,32 +1,121 @@
+// SCSS 변수 정의 (사용자 제공 변수 기반)
+$radius-l: 1.5rem;
+$radius-s: 0.5rem;
+$surface: #e0e0f0;
+$border: #cccccc;
+$main-color: #3498db;
+$hover-color: #2980b9;
+$text-primary: #333333;
+$text-secondary: #666666;
+
+// SCSS mixin for button styling
+@mixin primary-button {
+    display: inline-block;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: $main-color;
+    border-radius: $radius-s;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+
+    &:hover {
+        background-color: $hover-color;
+        transform: translateY(-1px);
+    }
+}
+
 .landing {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+    padding: 2rem;
+
+    .container {
+        max-width: 1200px;
+        width: 100%;
+        padding: 2rem;
+        text-align: center;
+    }
+
     .landing-hero {
         padding: 6rem 2rem;
         background: linear-gradient(135deg, #f7f7ff, #fafafa);
-        border-radius: var(--radius-l);
+        border-radius: $radius-l;
         margin-bottom: 3rem;
-        border: .1rem solid var(--surface);
+        border: .1rem solid $surface;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: $text-primary;
+        }
 
         .landing-sub {
             margin: 1rem 0 2rem;
+            font-size: 1.1rem;
+            color: $text-secondary;
+        }
+
+        .btn.primary {
+            @include primary-button;
         }
     }
 
     .landing-features {
         display: flex;
         gap: 2rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        justify-content: center;
 
         >li {
             flex: 1;
             padding: 2rem;
-            border-radius: var(--radius-s);
-            border: .1rem solid var(--border);
+            border-radius: $radius-s;
+            border: .1rem solid $border;
+            text-align: left;
+            background-color: #ffffff;
+            transition: box-shadow 0.3s;
+
+            &:hover {
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            h3 {
+                font-size: 1.35rem;
+                font-weight: 700;
+                color: $main-color;
+                margin-bottom: 0.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+                color: $text-secondary;
+            }
         }
     }
 
-    @media screen and (max-width:800px) {
+    @media screen and (max-width: 800px) {
+        padding: 1rem;
+
+        .landing-hero {
+            padding: 4rem 1rem;
+            margin-bottom: 2rem;
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
 
         .landing-features {
             flex-direction: column;
+            gap: 1.5rem;
         }
     }
 }
